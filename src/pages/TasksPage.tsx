@@ -1,67 +1,54 @@
 // src/pages/TasksPage.tsx
-import { useState } from 'react';
-import { Container, Form, Button, ListGroup, Row, Col, Card } from 'react-bootstrap';
-import type { Task } from '../types'; // Corregido a 'import type'
+import { useState, useEffect } from 'react';
+import { Container, Form, Button, ListGroup, Row, Col, Card, Alert } from 'react-bootstrap';
+import type { Task } from '../types';
 import Header from '../components/Header';
 import TaskItem from '../components/TaskItem';
+import taskService from '../services/taskService';
 
 function TasksPage() {
-  // 1. ACTUALIZAMOS los datos de ejemplo para incluir las nuevas propiedades.
-  const [tasks, setTasks] = useState<Task[]>([
-    { 
-      id: 1, 
-      title: 'Configurar el entorno de desarrollo', 
-      completed: true,
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // Hace 3 días
-      completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // Hace 1 día
-    },
-    { id: 2, title: 'Crear componentes de la UI', completed: true, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
-    { id: 3, title: 'Conectar el frontend con el backend', completed: false, createdAt: new Date().toISOString() },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  const handleAddTask = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await taskService.getTasks();
+        setTasks(response.data);
+      } catch (err) {
+        setError('Error al cargar las tareas. Por favor, intenta recargar la página.');
+        console.error(err);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newTaskTitle.trim() === '') return;
 
-    // 2. AÑADIMOS 'createdAt' al crear una nueva tarea.
-    const newTask: Task = {
-      id: Date.now(),
-      title: newTaskTitle,
-      completed: false,
-      createdAt: new Date().toISOString(), // Fecha de creación actual
-    };
-    setTasks([...tasks, newTask]);
-    setNewTaskTitle('');
+    try {
+      const response = await taskService.createTask(newTaskTitle);
+      setTasks([...tasks, response.data]);
+      setNewTaskTitle('');
+    } catch (err) {
+      setError('Error al crear la tarea. Inténtalo de nuevo.');
+      console.error(err);
+    }
   };
 
   const handleToggleComplete = (id: number) => {
-    setTasks(
-      tasks.map((task) => {
-        if (task.id === id) {
-          const isCompleted = !task.completed;
-          // 3. AÑADIMOS o quitamos 'completedAt' al marcar/desmarcar.
-          return {
-            ...task,
-            completed: isCompleted,
-            completedAt: isCompleted ? new Date().toISOString() : undefined,
-          };
-        }
-        return task;
-      })
-    );
+    console.log("Completar tarea (lógica pendiente):", id);
   };
 
   const handleDelete = (id: number) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+    console.log("Eliminar tarea (lógica pendiente):", id);
   };
 
   const handleEdit = (id: number, newTitle: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, title: newTitle } : task
-      )
-    );
+    console.log("Editar tarea (lógica pendiente):", id, newTitle);
   };
 
   return (
@@ -73,8 +60,10 @@ function TasksPage() {
             <Card className="shadow-sm">
               <Card.Body>
                 <h2 className="mb-4 text-center">Mis Tareas</h2>
+                {error && <Alert variant="danger">{error}</Alert>}
+                
+                {/* --- ESTA ES LA PARTE QUE FALTABA --- */}
                 <Form onSubmit={handleAddTask} className="mb-4">
-                  {/* ... el formulario no cambia ... */}
                   <Form.Group>
                     <Row>
                       <Col xs={9}>
@@ -91,6 +80,12 @@ function TasksPage() {
                     </Row>
                   </Form.Group>
                 </Form>
+                {/* --- FIN DE LA SECCIÓN QUE FALTABA --- */}
+
+                {tasks.length === 0 && !error && (
+                  <p className="text-center text-muted">¡Felicidades! No tienes tareas pendientes.</p>
+                )}
+
                 <ListGroup>
                   {tasks.map((task) => (
                     <TaskItem
