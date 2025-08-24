@@ -27,9 +27,44 @@ const createTask = (title: string) => {
   });
 };
 
+const deleteTask = (taskId: number) => {
+  const token = localStorage.getItem('token');
+  // Hacemos una petición DELETE a la URL específica de la tarea
+  return axios.delete(`${API_URL}/${taskId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
+
+const updateTaskCompletion = (taskId: number, completed: boolean) => {
+  const token = localStorage.getItem('token');
+  // Hacemos una petición PUT a la URL específica, pasando el estado 'completed' como parámetro
+  return axios.put<Task>(`${API_URL}/${taskId}`, null, { // El cuerpo es null porque enviamos los datos como parámetro
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    params: {
+      completed
+    }
+  });
+};
+
+const updateTaskTitle = (taskId: number, title: string) => {
+  const token = localStorage.getItem('token');
+  return axios.put<Task>(`${API_URL}/${taskId}/title`, { title }, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
+
 const taskService = {
   getTasks,
   createTask,
+  deleteTask,
+  updateTaskCompletion,
+  updateTaskTitle,
 };
 
 export default taskService;

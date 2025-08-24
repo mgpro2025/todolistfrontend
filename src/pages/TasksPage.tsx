@@ -39,17 +39,48 @@ function TasksPage() {
     }
   };
 
-  const handleToggleComplete = (id: number) => {
-    console.log("Completar tarea (lógica pendiente):", id);
-  };
+  const handleToggleComplete = async (id: number) => {
+  // Buscamos la tarea actual para saber su estado 'completed'
+  const taskToUpdate = tasks.find(task => task.id === id);
+  if (!taskToUpdate) return;
 
-  const handleDelete = (id: number) => {
-    console.log("Eliminar tarea (lógica pendiente):", id);
-  };
+  try {
+    // Llamamos al servicio con el estado opuesto
+    const response = await taskService.updateTaskCompletion(id, !taskToUpdate.completed);
 
-  const handleEdit = (id: number, newTitle: string) => {
-    console.log("Editar tarea (lógica pendiente):", id, newTitle);
-  };
+    // Actualizamos la lista de tareas en el frontend con la tarea devuelta por el backend
+    setTasks(tasks.map(task => 
+      task.id === id ? response.data : task
+    ));
+  } catch (err) {
+    setError('Error al actualizar la tarea. Inténtalo de nuevo.');
+    console.error(err);
+  }
+};
+
+  const handleDelete = async (id: number) => {
+  try {
+    // Llamamos al servicio para eliminar la tarea en el backend
+    await taskService.deleteTask(id);
+    // Actualizamos el estado del frontend para que la tarea desaparezca de la lista
+    setTasks(tasks.filter((task) => task.id !== id));
+  } catch (err) {
+    setError('Error al eliminar la tarea. Inténtalo de nuevo.');
+    console.error(err);
+  }
+};
+
+  const handleEdit = async (id: number, newTitle: string) => {
+  try {
+    const response = await taskService.updateTaskTitle(id, newTitle);
+    setTasks(tasks.map(task => 
+      task.id === id ? response.data : task
+    ));
+  } catch (err) {
+    setError('Error al editar la tarea. Inténtalo de nuevo.');
+    console.error(err);
+  }
+};
 
   return (
     <>
