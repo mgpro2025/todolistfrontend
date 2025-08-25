@@ -1,8 +1,7 @@
-// src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import authService from '../services/authService'; // Importamos el servicio
+import authService from '../services/authService';
 
 function LoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -10,41 +9,39 @@ function LoginPage() {
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
 
-  // Convertimos la función a 'async'
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
     try {
-      // Llamamos al método 'login' de nuestro servicio
       const response = await authService.login({ email, password });
-
-      // Si el login es exitoso y recibimos un token...
       if (response.data.token) {
-        // Guardamos el token en el localStorage del navegador.
-        // Esto nos permitirá mantener al usuario "logueado".
         localStorage.setItem('token', response.data.token);
-
-        // Redirigimos al usuario a la página de tareas
         navigate('/tasks');
       }
     } catch (err: any) {
-      // Si el backend devuelve un error (ej: credenciales incorrectas), lo mostramos.
       setError("Email o contraseña incorrectos. Por favor, inténtalo de nuevo.");
       console.error("Error en el login:", err);
     }
   };
 
   return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+    // CAMBIO 1: Quitamos 'justify-content-center' y añadimos 'pt-5' (padding-top)
+    // Esto alinea el contenido arriba en lugar de al centro.
+    <Container className="d-flex flex-column align-items-center pt-5" style={{ minHeight: '100vh' }}>
+      
+      {/* CAMBIO 2: Unimos el título en una sola línea y ajustamos el margen */}
+      <div className="text-center mb-5">
+        <h2 className="display-5 fw-bold text-primary">Gestor de Tareas MGM</h2>
+      </div>
+
       <Row className="w-100 justify-content-center">
         <Col xs={11} md={8} lg={6} xl={5}>
           <Card className="shadow-sm">
             <Card.Body>
-              <h2 className="text-center mb-4">Iniciar Sesión</h2>
-              {/* Mostramos el mensaje de error si existe */}
+              <h3 className="text-center mb-4">Iniciar Sesión</h3>
               {error && <Alert variant="danger">{error}</Alert>}
-
+              
               <Form onSubmit={handleSubmit}>
                 <Form.Group id="email" className="mb-3">
                   <Form.Label>Correo Electrónico</Form.Label>
