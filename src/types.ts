@@ -4,7 +4,8 @@ export interface Task {
   title: string;
   completed: boolean;
   createdAt: string; // Guardaremos la fecha como un string en formato ISO
-  completedAt?: string; // El '?' indica que es opcional
+  completedAt?: string; 
+  dueDate?: string; 
 }
 
 export interface AuthCredentials {

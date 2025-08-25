@@ -17,13 +17,10 @@ const getTasks = () => {
   });
 };
 
-const createTask = (title: string) => {
+const createTask = (title: string, dueDate: string | null) => {
   const token = localStorage.getItem('token');
-  // Hacemos una petición POST, enviando el título en el cuerpo
-  return axios.post<Task>(API_URL, { title }, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+  return axios.post<Task>(API_URL, { title, dueDate }, {
+    headers: { Authorization: `Bearer ${token}` }
   });
 };
 
